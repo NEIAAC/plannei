@@ -1,13 +1,9 @@
-from datetime import datetime
-
 from PySide6.QtCore import QThread, Signal
 
 from utils.logger import logger
 
 
 class ExampleThread(QThread):
-    """Example thread to run tasks in the background and send events to the main UI thread."""
-
     outputSignal = Signal(str, str)
 
     def __init__(self, firstInput: str, secondInput: str | None = None):
@@ -17,13 +13,15 @@ class ExampleThread(QThread):
 
     def output(self, text: str, level="INFO"):
         logger.log(level, text)
-        timestamped = f"[{datetime.now().strftime('%H:%M:%S')}] {text}\n"
-        self.outputSignal.emit(timestamped, level)
+        self.outputSignal.emit(text, level)
 
     def run(self):
-        logger.info(
-            f"Starting example thread with input parameters: {self.__dict__}"
-        )
+        inputs = self.__dict__.copy()
+        inputs.pop("loginEmail", False)
+        inputs.pop("loginPassword", False)
+
+        logger.info(f"Starting browser thread with input parameters: {inputs}")
+
         self.output("...")
         with logger.catch():
             self.output("Your first input was: " + self.firstInput)

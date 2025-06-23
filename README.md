@@ -12,7 +12,7 @@ With the exception of the points above, we believe this template to be decently 
 
 - ### Windows 🪟
 
-  - [Use this link to start the download.](https://github.com/NEIAAC/python-template/releases/latest/download/Windows.zip)
+  - [Use this link to start the download.](https://github.com/NEIAAC/plannei/releases/latest/download/Windows.zip)
 
   - Start the `exe` file **inside** the extracted folder by _double clicking_ on it, you can create a shortcut with any name you like for this file.
 
@@ -20,7 +20,7 @@ With the exception of the points above, we believe this template to be decently 
 
 - ### Linux 🐧
 
-  - [Use this link to start the download.](https://github.com/NEIAAC/python-template/releases/latest/download/Linux.zip)
+  - [Use this link to start the download.](https://github.com/NEIAAC/plannei/releases/latest/download/Linux.zip)
 
   - Start the `bin` file **inside** the extracted folder, remember to **update the execution permissions** first by opening a terminal and running:
 
@@ -33,11 +33,15 @@ With the exception of the points above, we believe this template to be decently 
 
 - ### MacOS 🍎
 
-  - [Use this link to start the download.](https://github.com/NEIAAC/python-template/releases/latest/download/MacOS.zip)
+  - [Use this link to start the download.](https://github.com/NEIAAC/plannei/releases/latest/download/MacOS.zip)
 
   - Start the extracted bundle `app` by _clicking_ on it.
 
   - If the app fails to open, go to [this support page](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac) and select your OS version at the top, then follow the instructions.
+
+- Detailed usage instructions can be found in the **guide** page, inside the app.
+
+- See the [example](./example/) directory for demo files.
 
 ## Development 🛠️
 
@@ -105,18 +109,3 @@ With the exception of the points above, we believe this template to be decently 
     ```
 
     See the [deploy workflow](./.github/workflows/deploy.yaml) for a list of options used for each platform.
-
-## Notes 📝
-
-When using this repository as a template make sure to:
-
-- Edit the app information in the `src/config/metadata.py` file. Along with being used in the code, these values are
-also used during the build process to set specific data in the binaries.
-
-- Change the version string in the `.manifest.json` file, otherwise the project will start at the same version as the template. You only need to change the version here, the next triggered release will update any other related files based on the new version.
-
-- Update the description and hard coded repository links in this `README.md`, specifically the download links in the **Usage** section.
-
-- Be aware that signing apps for MacOS and Windows is not done automatically. If you need app signing, it is recommended to introduce it in the build/deploy workflow.
-
-- Delete these notes.

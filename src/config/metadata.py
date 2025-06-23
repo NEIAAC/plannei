@@ -3,7 +3,7 @@ import os
 from PySide6.QtCore import QStandardPaths
 
 # Beware of changing these variable names as they are used in the deployment workflows to get required information
-EXECUTABLE_NAME = "Template"
+EXECUTABLE_NAME = "Plannei"
 AUTHOR_NAME = "NEIAAC"
 AUTHOR_DOMAIN = "neiaac.com"
 
