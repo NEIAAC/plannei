@@ -1,0 +1,42 @@
+[project]
+name = "app"
+dynamic = ["version"]
+requires-python = "~=3.11"
+dependencies = [
+    "pyside6==6.8.0.2",
+    "pyside6-fluent-widgets==1.6.6",
+    "loguru==0.7.2",
+]
+
+[project.optional-dependencies]
+lint = ["mypy==1.15.0", "ruff==0.11.10", "pre-commit==4.2.0"]
+test = ["pytest==8.3.3", "pytest-qt==4.4.0", "pytest-xvfb==3.0.0"]
+build = ["nuitka==2.7.2", "imageio==2.36.0"]
+
+[tool.mypy]
+strict = false
+follow_untyped_imports = true
+check_untyped_defs = true
+
+[tool.ruff]
+line-length = 80
+indent-width = 4
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"window.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+qt_qapp_name = "Test"
+addopts = "-ra"
+testpaths = ["test"]
+python_files = ["*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["*Test", "test*"]
