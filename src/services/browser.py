@@ -9,6 +9,7 @@ from PySide6.QtCore import QThread, Signal
 from openpyxl import load_workbook, __version__ as openpyxl_version
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 
 from utils.logger import logger, LogLevel
 
@@ -122,6 +123,7 @@ class BrowserThread(QThread):
         options.add_argument(f"--user-agent={random.choice(USER_AGENTS)}")
         if self.headless:
             options.add_argument("--headless")
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
         options.page_load_strategy = "eager"
         service = webdriver.ChromeService(log_output=subprocess.DEVNULL)
         return webdriver.Chrome(options=options, service=service)
@@ -195,16 +197,22 @@ class BrowserThread(QThread):
                 ],
             ] = {}
             for item in rows_dict:
-                classId = item[headers[0]].strip()
+                classId = item[headers[0]].replace(" ", "").split("#")[0]
 
                 pl_array = (
-                    item[headers[1]].split("#") if item[headers[1]] else None
+                    item[headers[1]].replace(" ", "").split("#")
+                    if item[headers[1]]
+                    else None
                 )
                 tp_array = (
-                    item[headers[2]].split("#") if item[headers[2]] else None
+                    item[headers[2]].replace(" ", "").split("#")
+                    if item[headers[2]]
+                    else None
                 )
                 t_array = (
-                    item[headers[3]].split("#") if item[headers[3]] else None
+                    item[headers[3]].replace(" ", "").split("#")
+                    if item[headers[3]]
+                    else None
                 )
 
                 classes_dict[classId] = {
@@ -214,7 +222,7 @@ class BrowserThread(QThread):
                     "T": t_array,
                 }
             self.output(
-                f"Processed schedule table, found entries for {len(classes_dict)} classes"
+                f"Enrolling for {len(classes_dict)} classes found in schedule table",
             )
 
             self.output("Starting browser")
@@ -237,7 +245,9 @@ class BrowserThread(QThread):
                 return
 
             self.output(f"{driver.name.capitalize()} initialized")
-            self.output(f"Navigating to {LOGIN_URL}")
+            self.output(
+                f"Navigating to {LOGIN_URL.split('/')[-1].split('.')[0]}"
+            )
             driver.get(LOGIN_URL)
 
             if driver.current_url != LOGIN_URL:
@@ -251,12 +261,10 @@ class BrowserThread(QThread):
                 )
                 username_input.send_keys(self.loginEmail)
                 password_input.send_keys(self.loginPassword)
-                self.output("Filled login form")
                 login_button = driver.find_element(
                     By.CSS_SELECTOR, "input[type='submit']"
                 )
                 login_button.click()
-                self.output("Clicked login button")
                 if driver.current_url == LOGIN_URL:
                     self.output(
                         "Login failed, check your credentials", LogLevel.ERROR
@@ -264,10 +272,9 @@ class BrowserThread(QThread):
                     return
                 self.output("Login successful")
 
-            self.output(f"Now at {driver.current_url}")
-            self.output(f"Navigating to {ENROLL_URL}")
+            self.output(f"Now at {driver.current_url.split('/')[-2]}")
+            self.output(f"Navigating to {ENROLL_URL.split('/')[-2]}")
             driver.get(ENROLL_URL)
-            self.output(f"Now at {driver.current_url}")
 
             tableBody = driver.find_element(
                 By.CSS_SELECTOR, "table.displaytable > tbody"
@@ -298,8 +305,6 @@ class BrowserThread(QThread):
             self.output(f"Proceeding to enrollment in {chosenEnrollmentText}")
             driver.get(chosenEnrollmentLink)
 
-            self.output(f"Now at {driver.current_url}")
-
             # Parse every row in the courses table body and add the href for that courses enrollment page to the classes_dict
             tableBody = driver.find_element(
                 By.CSS_SELECTOR, "table.displaytable > tbody"
@@ -316,6 +321,8 @@ class BrowserThread(QThread):
                 if classId in classes_dict:
                     classes_dict[classId]["href"] = href
                     classes_dict[classId]["className"] = className
+
+            picked_dict: dict[str, str | None] = {}
             for classId, classData in classes_dict.items():
                 if not isinstance(classData["href"], str):
                     self.output(
@@ -326,8 +333,85 @@ class BrowserThread(QThread):
                 self.output(
                     f"Proceeding to class {classData['className']} enrollment"
                 )
+                # Maybe this can be improved to use multiple tabs, open all course pages at once in
+                # different tabs and fill the preferences in parallel for each one
                 driver.get(classData["href"])
-                self.output(f"Now at {driver.current_url}")
+
+                classTypes = ("PL", "TP", "T")
+
+                for classType in classTypes:
+                    if classData[classType]:
+                        classRows = driver.find_elements(
+                            By.CSS_SELECTOR,
+                            f'table[class="displaytable"]:has(input[type="checkbox"][alt="{classType}"]) > tbody > tr',
+                        )
+                        if not classRows:
+                            self.output(
+                                f"Class {classData['className']} ({classId}) had {classType} preferences but there are no {classType} schedules available",
+                                LogLevel.WARNING,
+                            )
+                            continue
+                        self.output(
+                            f"Choosing {classType} schedule for class {classData['className']}"
+                        )
+                        preferences_dict: dict[str, WebElement] = {}
+                        for row in classRows:
+                            cells = row.find_elements(By.TAG_NAME, "td")
+                            classNumber = (
+                                cells[0].text.split(classType)[-1].strip()
+                            )
+                            classCheckbox = cells[-1].find_element(
+                                By.TAG_NAME, "input"
+                            )
+                            if (
+                                classCheckbox.get_attribute("name")
+                                != "inscrever"
+                            ):
+                                self.output(
+                                    f"Skipping {classType}{classNumber} in class {classData['className']}, enrollment not available yet",
+                                    LogLevel.INFO,
+                                )
+                                continue
+                            if classCheckbox.get_attribute("disabled"):
+                                self.output(
+                                    f"{classType}{classNumber} is full in class {classData['className']}, skipping",
+                                    LogLevel.INFO,
+                                )
+                                continue
+                            if classCheckbox.get_attribute("checked"):
+                                self.output(
+                                    f"Already enrolled in {classType}{classNumber} for class {classData['className']}, ",
+                                    LogLevel.INFO,
+                                )
+                                continue
+                            preferences_dict[classNumber] = classCheckbox
+                        for preferences in classData[classType]:  # type: ignore
+                            if preferences in preferences_dict:
+                                self.output(
+                                    f"Enrolling in {classType}{preferences} for class {classData['className']}"
+                                )
+                                preferences_dict[preferences].click()
+                                picked_dict[
+                                    f"{classData['className']} {classType}"
+                                ] = preferences
+                                continue
+                # Once all class types are checked for this course, click the save button
+                save_button = driver.find_element(
+                    By.CSS_SELECTOR, "input[id='botaoGravar']"
+                )
+                save_button.click()
+            self.output(
+                f"Enrollment completed for {len(picked_dict)} classes",
+            )
+            if picked_dict:
+                self.output(
+                    "Final choices were:\n"
+                    + "\n".join(
+                        f"{key}: {preference}"
+                        for key, preference in picked_dict.items()
+                    ),
+                )
+
         except Exception as error:
             self.output(
                 f"An unexpected error occurred: {f'{error}'.split(';')[0][9:]}",

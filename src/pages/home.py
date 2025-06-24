@@ -268,9 +268,9 @@ class HomePage(QWidget):
             if level == LogLevel.ERROR.value:
                 self.runLogsBox.append(f'<font color="red">{text}</font>')
             elif level == LogLevel.WARNING.value:
-                self.runLogsBox.append(f'<font color="yellow">{text}</font>')
+                self.runLogsBox.append(f'<font color="olive">{text}</font>')
             else:
-                self.runLogsBox.append(f'<font color="lime">{text}</font>')
+                self.runLogsBox.append(f'<font color="gray">{text}</font>')
             self.runLogsClearButton.setDisabled(False)
 
         self.worker.outputSignal.connect(output)
@@ -278,11 +278,6 @@ class HomePage(QWidget):
         def finished():
             self.runButton.setDisabled(False)
             App.alert(self, 0)
-            # if (
-            #     App.applicationState()
-            #     == Qt.ApplicationState.ApplicationInactive
-            # ):
-            #     SystemTray().send("Example finished!", "Go back to the app.")
             self.finishSound.play()
 
         self.worker.finished.connect(finished)
