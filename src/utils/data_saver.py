@@ -71,7 +71,6 @@ class Config(QConfig):
         "",
     )
 
-
     def reset(self):
         for _, attr in self.__class__.__dict__.items():
             if isinstance(attr, ConfigItem):

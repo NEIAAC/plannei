@@ -1,4 +1,10 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QSizePolicy,
+    QFileDialog,
+)
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtMultimedia import QSoundEffect
 from qfluentwidgets import (
@@ -22,6 +28,7 @@ from services.browser import BrowserThread
 from utils.data_saver import config
 from utils import file_loader
 from services.browser import BrowserChoice
+from utils.logger import LogLevel
 
 
 class HomePage(QWidget):
@@ -40,9 +47,7 @@ class HomePage(QWidget):
         self.loginEmailLabel = BodyLabel("<b>LOGIN EMAIL<b>")
         self.loginEmailField = LineEdit()
         self.loginEmailField.setMaximumWidth(500)
-        self.loginEmailField.setPlaceholderText(
-            "example@student.uc.pt"
-        )
+        self.loginEmailField.setPlaceholderText("example@student.uc.pt")
         self.loginEmailField.textChanged.connect(
             lambda text: config.loginEmail.set(text)
         )
@@ -76,13 +81,20 @@ class HomePage(QWidget):
         self.browserChoiceCombo = ComboBox()
         self.browserChoiceCombo.setMaximumWidth(500)
         for choice in BrowserChoice:
-            self.browserChoiceCombo.addItem(choice.value.title(), userData=choice.value)
+            self.browserChoiceCombo.addItem(
+                choice.value.title(), userData=choice.value
+            )
         for i in range(self.browserChoiceCombo.count()):
-            if self.browserChoiceCombo.itemData(i) == config.browserChoice.get():
+            if (
+                self.browserChoiceCombo.itemData(i)
+                == config.browserChoice.get()
+            ):
                 self.browserChoiceCombo.setCurrentIndex(i)
                 break
         self.browserChoiceCombo.currentIndexChanged.connect(
-            lambda: config.browserChoice.set(self.browserChoiceCombo.currentData())
+            lambda: config.browserChoice.set(
+                self.browserChoiceCombo.currentData()
+            )
         )
 
         self.browserChoiceLayout = QVBoxLayout()
@@ -128,15 +140,17 @@ class HomePage(QWidget):
         self.tableFileInput.setMaximumWidth(500)
         self.tableFileInput.setPlaceholderText("No table file selected.")
         self.tableFileInput.setText(config.tablePath.get())
-        self.tableFileInput.textChanged.connect(lambda text: config.tablePath.set(text))
+        self.tableFileInput.textChanged.connect(
+            lambda text: config.tablePath.set(text)
+        )
         self.tableFileDialog = QFileDialog()
         self.tableFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         self.tableFilePickButton = PrimaryToolButton(FluentIcon.FOLDER)
         self.tableFilePickButton.clicked.connect(
             lambda: self.tableFileInput.setText(
-            self.tableFileDialog.getOpenFileName(
-                self, "Select a table file!"
-            )[0]
+                self.tableFileDialog.getOpenFileName(
+                    self, "Select a table file!"
+                )[0]
             )
         )
         self.tableContentLayout = QHBoxLayout()
@@ -250,11 +264,13 @@ class HomePage(QWidget):
             tablePath=self.tableFileInput.text(),
         )
 
-        def output(text, level):
-            if level == "ERROR":
+        def output(text: str, level: LogLevel):
+            if level == LogLevel.ERROR.value:
                 self.runLogsBox.append(f'<font color="red">{text}</font>')
+            elif level == LogLevel.WARNING.value:
+                self.runLogsBox.append(f'<font color="yellow">{text}</font>')
             else:
-                self.runLogsBox.append(f'<font color="green">{text}</font>')
+                self.runLogsBox.append(f'<font color="lime">{text}</font>')
             self.runLogsClearButton.setDisabled(False)
 
         self.worker.outputSignal.connect(output)
