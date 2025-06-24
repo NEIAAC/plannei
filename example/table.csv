@@ -1,4 +1,4 @@
 CLASS,PL,TP,T
-01000010 # Calculus1,9,7 # 2,,
+01000010 # Calculus,,7 # 2,,
 01000021#AlgebraHasTPOnly,,4 # 5,,
-01017325 # Algorithms,2 # 10 # 4,,,
+01017325 # Algorithms,2 # 10 # 4,1 # 2 , 1,

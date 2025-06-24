@@ -39,6 +39,7 @@ class BrowserThread(QThread):
         loginPassword: str,
         browserChoice: BrowserChoice,
         headless: bool,
+        dryRun: bool,
         enrollmentIndex: int,
         tablePath: str,
     ):
@@ -49,6 +50,7 @@ class BrowserThread(QThread):
         self.headless = headless
         self.enrollmentIndex = enrollmentIndex
         self.tablePath = tablePath
+        self.dryRun = dryRun
 
     def output(self, text: str, level: LogLevel = LogLevel.INFO):
         logger.log(level.value, text)
@@ -92,7 +94,7 @@ class BrowserThread(QThread):
             if not headers:
                 raise ValueError("Excel file has no headers")
             records = []
-            for row in sheet.iter_rows(min_row=2, values_only=True):  # type: ignore
+            for row in sheet.iter_rows(min_row=2, values_only=True):
                 logger.debug(f"Row data: {row}")
                 record = {
                     headers[i]: (value if value else "")
@@ -107,7 +109,6 @@ class BrowserThread(QThread):
 
     def setupChromium(self) -> webdriver.Chrome:
         options = webdriver.ChromeOptions()
-        options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
@@ -122,11 +123,17 @@ class BrowserThread(QThread):
         options.add_argument("--remote-allow-origins=*")
         options.add_argument(f"--user-agent={random.choice(USER_AGENTS)}")
         if self.headless:
+            options.add_argument("--window-size=1920,1080")
             options.add_argument("--headless")
+        else:
+            options.add_argument("--start-maximized")
         options.add_experimental_option("excludeSwitches", ["enable-logging"])
         options.page_load_strategy = "eager"
         service = webdriver.ChromeService(log_output=subprocess.DEVNULL)
-        return webdriver.Chrome(options=options, service=service)
+        driver = webdriver.Chrome(options=options, service=service)
+        if not self.headless:
+            driver.maximize_window()
+        return driver
 
     def setupFirefox(self) -> webdriver.Firefox:
         options = webdriver.FirefoxOptions()
@@ -141,10 +148,15 @@ class BrowserThread(QThread):
             "general.useragent.override", random.choice(USER_AGENTS)
         )
         if self.headless:
+            options.add_argument("--width=1920")
+            options.add_argument("--height=1080")
             options.add_argument("--headless")
         options.page_load_strategy = "eager"
         service = webdriver.FirefoxService(log_output=subprocess.DEVNULL)
-        return webdriver.Firefox(options=options, service=service)
+        driver = webdriver.Firefox(options=options, service=service)
+        if not self.headless:
+            driver.maximize_window()
+        return driver
 
     def run(self):
         try:
@@ -222,7 +234,7 @@ class BrowserThread(QThread):
                     "T": t_array,
                 }
             self.output(
-                f"Enrolling for {len(classes_dict)} classes found in schedule table",
+                f"{'[DRY-RUN MODE] ' if self.dryRun else ''}Enrolling in the {len(classes_dict)} classes found in the schedule table",
             )
 
             self.output("Starting browser")
@@ -267,7 +279,8 @@ class BrowserThread(QThread):
                 login_button.click()
                 if driver.current_url == LOGIN_URL:
                     self.output(
-                        "Login failed, check your credentials", LogLevel.ERROR
+                        "Login failed, check your credentials and retry",
+                        LogLevel.ERROR,
                     )
                     return
                 self.output("Login successful")
@@ -330,12 +343,24 @@ class BrowserThread(QThread):
                         LogLevel.WARNING,
                     )
                     continue
-                self.output(
-                    f"Proceeding to class {classData['className']} enrollment"
-                )
+                self.output(f"Proceeding to {classData['className']} schedule")
+
                 # Maybe this can be improved to use multiple tabs, open all course pages at once in
                 # different tabs and fill the preferences in parallel for each one
                 driver.get(classData["href"])
+
+                if not self.dryRun:
+                    try:
+                        save_button = driver.find_element(By.ID, "botaoGravar")
+                    except Exception:
+                        self.output(
+                            f"Schedule choice for {classData['className']} ({classId}) is not available yet, skipping",
+                            LogLevel.WARNING,
+                        )
+                        continue
+                else:
+                    # Use back button instead of trying to find save in dry run mode
+                    save_button = driver.find_element(By.ID, "botaoVoltar")
 
                 classTypes = ("PL", "TP", "T")
 
@@ -357,24 +382,36 @@ class BrowserThread(QThread):
                         preferences_dict: dict[str, WebElement] = {}
                         for row in classRows:
                             cells = row.find_elements(By.TAG_NAME, "td")
+
+                            element = cells[0].get_attribute("innerHTML") or ""
+
                             classNumber = (
-                                cells[0].text.split(classType)[-1].strip()
+                                element.split("<sup>")[0]
+                                .split(classType)[-1]
+                                .strip()
                             )
-                            classCheckbox = cells[-1].find_element(
-                                By.TAG_NAME, "input"
-                            )
-                            if (
-                                classCheckbox.get_attribute("name")
-                                != "inscrever"
-                            ):
-                                self.output(
-                                    f"Skipping {classType}{classNumber} in class {classData['className']}, enrollment not available yet",
-                                    LogLevel.INFO,
-                                )
+
+                            if classNumber not in (classData[classType] or []):
                                 continue
+
+                            # Try to find preview checkbox instead of the real selection checkbox
+                            # so dryRun works even if enrollments are open
+                            if self.dryRun:
+                                try:
+                                    classCheckbox = cells[-2].find_element(
+                                        By.TAG_NAME, "input"
+                                    )
+                                except Exception:
+                                    classCheckbox = cells[-1].find_element(
+                                        By.TAG_NAME, "input"
+                                    )
+                            else:
+                                classCheckbox = cells[-1].find_element(
+                                    By.TAG_NAME, "input"
+                                )
                             if classCheckbox.get_attribute("disabled"):
                                 self.output(
-                                    f"{classType}{classNumber} is full in class {classData['className']}, skipping",
+                                    f"{classType}{classNumber} is full (or mandatory) for class {classData['className']}, skipping",
                                     LogLevel.INFO,
                                 )
                                 continue
@@ -385,32 +422,27 @@ class BrowserThread(QThread):
                                 )
                                 continue
                             preferences_dict[classNumber] = classCheckbox
-                        for preferences in classData[classType]:  # type: ignore
-                            if preferences in preferences_dict:
+                        for classNumber in classData[classType] or []:
+                            if classNumber in preferences_dict:
                                 self.output(
-                                    f"Enrolling in {classType}{preferences} for class {classData['className']}"
+                                    f"Enrolling in {classType}{classNumber} for class {classData['className']}"
                                 )
-                                preferences_dict[preferences].click()
+                                preferences_dict[classNumber].click()
                                 picked_dict[
                                     f"{classData['className']} {classType}"
-                                ] = preferences
-                                continue
-                # Once all class types are checked for this course, click the save button
-                save_button = driver.find_element(
-                    By.CSS_SELECTOR, "input[id='botaoGravar']"
-                )
+                                ] = classNumber
+                                break
                 save_button.click()
             self.output(
                 f"Enrollment completed for {len(picked_dict)} classes",
             )
             if picked_dict:
                 self.output(
-                    "Final choices were:\n"
-                    + "\n".join(
-                        f"{key}: {preference}"
-                        for key, preference in picked_dict.items()
-                    ),
+                    "Final choices were:",
+                    LogLevel.SUCCESS,
                 )
+                for className, preference in picked_dict.items():
+                    self.output(f"{className}{preference}", LogLevel.SUCCESS)
 
         except Exception as error:
             self.output(

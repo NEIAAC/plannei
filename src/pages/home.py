@@ -114,11 +114,19 @@ class HomePage(QWidget):
         self.headlessLayout.addWidget(self.headlessLabel)
         self.headlessLayout.addWidget(self.headlessCheckBox)
 
+        self.dryRunLabel = BodyLabel("<b>DRY RUN</b>")
+        self.dryRunCheckBox = CheckBox()
+        self.dryRunLayout = QVBoxLayout()
+        self.dryRunLayout.setSpacing(10)
+        self.dryRunLayout.addWidget(self.dryRunLabel)
+        self.dryRunLayout.addWidget(self.dryRunCheckBox)
+
         self.configsLayout = FlowLayout()
         self.configsLayout.setVerticalSpacing(20)
         self.configsLayout.setHorizontalSpacing(20)
         self.configsLayout.addItem(self.browserChoiceLayout)
         self.configsLayout.addItem(self.headlessLayout)
+        self.configsLayout.addItem(self.dryRunLayout)
 
         self.enrollmentIndexLabel = BodyLabel("<b>ENROLLMENT INDEX</b>")
         self.enrollmentIndexInput = SpinBox()
@@ -260,6 +268,7 @@ class HomePage(QWidget):
             loginPassword=self.loginPasswordField.text(),
             browserChoice=BrowserChoice(self.browserChoiceCombo.currentData()),
             headless=self.headlessCheckBox.isChecked(),
+            dryRun=self.dryRunCheckBox.isChecked(),
             enrollmentIndex=self.enrollmentIndexInput.value(),
             tablePath=self.tableFileInput.text(),
         )
@@ -269,6 +278,8 @@ class HomePage(QWidget):
                 self.runLogsBox.append(f'<font color="red">{text}</font>')
             elif level == LogLevel.WARNING.value:
                 self.runLogsBox.append(f'<font color="olive">{text}</font>')
+            elif level == LogLevel.SUCCESS.value:
+                self.runLogsBox.append(f'<font color="green">{text}</font>')
             else:
                 self.runLogsBox.append(f'<font color="gray">{text}</font>')
             self.runLogsClearButton.setDisabled(False)
