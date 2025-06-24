@@ -1,6 +1,12 @@
-# TEMPORARY
+# Time to plan 🕑📅
 
-PLACEHOLDER TEXT HERE!
+Using Plannei, our _state of the art_ schedule automater, you can ensure you get the best possible schedules for your classes at the [University of Coimbra](https://www.uc.pt).
+
+The app runs a self-managed browser that will seamlessly interact with our student portal, [nonio](https://xws.pt/nonio), to automatically fill in the data to get your perfect schedule, based on the preferences you give it throught a spreadsheet.
+
+You can now be the biggest nerd on the block and get the schedule you want as soon as the enrollment period opens, leaving your colleagues in the dust
+
+_NEI/AAC is not responsible for you losing your perfect schedule due to issues with the app._
 
 ## Usage 🚀
 
@@ -35,7 +41,7 @@ PLACEHOLDER TEXT HERE!
 
   - If the app fails to open, go to [this support page](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac) and select your OS version at the top, then follow the instructions.
 
-- Detailed usage instructions can be found in the **guide** page, inside the app.
+- Detailed usage instructions can be found in the [wiki](https://github.com/NEIAAC/plannei/wiki) page.
 
 - See the [example](./example/) directory for demo files.
 

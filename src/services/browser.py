@@ -10,15 +10,15 @@ from enum import Enum
 
 from utils.logger import logger
 
+class BrowserChoice(Enum):
+    CHROME = "chrome"
+    FIREFOX = "firefox"
+
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
 ]
-
-class BrowserChoice(Enum):
-    CHROMIUM = "chromium"
-    FIREFOX = "firefox"
 
 BASE_URL = "https://inforestudante.uc.pt"
 LOGIN_URL = f"{BASE_URL}/nonio/security/login.do"
@@ -148,7 +148,7 @@ class BrowserThread(QThread):
 
         with logger.catch():
             try:
-                if self.browserChoice == BrowserChoice.CHROMIUM:
+                if self.browserChoice == BrowserChoice.CHROME:
                     driver = self.setupChromium()
                 elif self.browserChoice == BrowserChoice.FIREFOX:
                     driver = self.setupFirefox()

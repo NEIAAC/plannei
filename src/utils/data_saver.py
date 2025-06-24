@@ -58,7 +58,7 @@ class Config(QConfig):
     browserChoice = ConfigItem(
         "Browser",
         "BrowserChoice",
-        BrowserChoice.CHROMIUM.value,
+        BrowserChoice.CHROME.value,
     )
     enrollmentIndex = ConfigItem(
         "Browser",

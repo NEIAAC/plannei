@@ -19,7 +19,6 @@ from PySide6.QtCore import QSize, QPoint
 from utils.data_saver import config
 from pages.home import HomePage
 from pages.settings import SettingsPage
-from pages.guide import GuidePage
 
 
 class Window(FluentWindow):
@@ -41,12 +40,6 @@ class Window(FluentWindow):
 
         self.addSubInterface(HomePage(), FluentIcon.HOME, "Home")
 
-        self.addSubInterface(
-            GuidePage(),
-            FluentIcon.DICTIONARY,
-            "Guide",
-            NavigationItemPosition.BOTTOM,
-        )
         self.addSubInterface(
             SettingsPage(),
             FluentIcon.SETTING,
