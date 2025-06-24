@@ -336,6 +336,10 @@ class BrowserThread(QThread):
                     classes_dict[classId]["className"] = className
 
             picked_dict: dict[str, str | None] = {}
+
+            # TODO: Maybe do this in a while loop untill everything is picked or we run out of attempeted preferences, in case
+            # the saving fails after checking the checkboxes in a class
+
             for classId, classData in classes_dict.items():
                 if not isinstance(classData["href"], str):
                     self.output(
@@ -345,7 +349,7 @@ class BrowserThread(QThread):
                     continue
                 self.output(f"Proceeding to {classData['className']} schedule")
 
-                # Maybe this can be improved to use multiple tabs, open all course pages at once in
+                # TODO: Maybe this can be improved to use multiple tabs, open all course pages at once in
                 # different tabs and fill the preferences in parallel for each one
                 driver.get(classData["href"])
 
@@ -379,19 +383,22 @@ class BrowserThread(QThread):
                         self.output(
                             f"Choosing {classType} schedule for class {classData['className']}"
                         )
-                        preferences_dict: dict[str, WebElement] = {}
+                        possibilities_dict: dict[str, WebElement] = {}
+                        alreadyPicked = False
                         for row in classRows:
                             cells = row.find_elements(By.TAG_NAME, "td")
 
                             element = cells[0].get_attribute("innerHTML") or ""
 
-                            classNumber = (
+                            classNumberPreference = (
                                 element.split("<sup>")[0]
                                 .split(classType)[-1]
                                 .strip()
                             )
 
-                            if classNumber not in (classData[classType] or []):
+                            if classNumberPreference not in (
+                                classData[classType] or []
+                            ):
                                 continue
 
                             # Try to find preview checkbox instead of the real selection checkbox
@@ -410,27 +417,39 @@ class BrowserThread(QThread):
                                     By.TAG_NAME, "input"
                                 )
                             if classCheckbox.get_attribute("disabled"):
-                                self.output(
-                                    f"{classType}{classNumber} is full (or mandatory) for class {classData['className']}, skipping",
-                                    LogLevel.INFO,
-                                )
                                 continue
                             if classCheckbox.get_attribute("checked"):
-                                self.output(
-                                    f"Already enrolled in {classType}{classNumber} for class {classData['className']}, ",
-                                    LogLevel.INFO,
-                                )
+                                alreadyPicked = True
                                 continue
-                            preferences_dict[classNumber] = classCheckbox
-                        for classNumber in classData[classType] or []:
-                            if classNumber in preferences_dict:
+                            possibilities_dict[classNumberPreference] = (
+                                classCheckbox
+                            )
+                        if alreadyPicked:
+                            self.output(
+                                f"Already picked {classType} schedule",
+                                LogLevel.INFO,
+                            )
+                            continue
+                        if not possibilities_dict:
+                            self.output(
+                                "None of the preferences were available, may need manual picking",
+                                LogLevel.WARNING,
+                            )
+                            continue
+                        for classNumberPreference in classData[classType] or []:
+                            if (
+                                classNumberPreference
+                                in possibilities_dict.keys()
+                            ):
                                 self.output(
-                                    f"Enrolling in {classType}{classNumber} for class {classData['className']}"
+                                    f"Enrolling in {classType}{classNumberPreference}"
                                 )
-                                preferences_dict[classNumber].click()
+                                possibilities_dict[
+                                    classNumberPreference
+                                ].click()
                                 picked_dict[
                                     f"{classData['className']} {classType}"
-                                ] = classNumber
+                                ] = classNumberPreference
                                 break
                 save_button.click()
             self.output(
