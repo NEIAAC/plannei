@@ -1,5 +1,5 @@
 CLASS,PL,TP,T
 01000010 # Calculus,,7 # 2,
 01000021 # AlgebraHasTPOnly,,4 # 5,
-01017325 # Hardware,2 # 10 # 4,1 # 2 ,1,
-01000169 # IntroductionToProgramming,8 # 3 # 9,3 # 2 ,2,
+01017325 # Hardware,2 # 10 # 4,1 # 2 ,1
+01000169 # IntroductionToProgramming,8 # 3 # 9,3 # 2 ,2
