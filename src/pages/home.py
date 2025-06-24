@@ -72,43 +72,41 @@ class HomePage(QWidget):
         self.loginLayout.addLayout(self.loginEmailLayout)
         self.loginLayout.addLayout(self.loginPasswordLayout)
 
-        self.browserChoiceLabel = BodyLabel("<b>BROWSER CHOICE</b>")
-        self.browserChoiceInput = LineEdit()
-        self.browserChoiceInput.setReadOnly(True)
-        self.browserChoiceInput.setMaximumWidth(500)
-        self.browserChoiceInput.setPlaceholderText(
-            "Browser choice is set to Firefox by default."
+        self.browserChoiceLabel = BodyLabel("<b>BROWSER</b>")
+        self.browserChoiceCombo = ComboBox()
+        self.browserChoiceCombo.setMaximumWidth(500)
+        for choice in BrowserChoice:
+            self.browserChoiceCombo.addItem(choice.value.title(), userData=choice.value)
+        for i in range(self.browserChoiceCombo.count()):
+            if self.browserChoiceCombo.itemData(i) == config.browserChoice.get():
+                self.browserChoiceCombo.setCurrentIndex(i)
+                break
+        self.browserChoiceCombo.currentIndexChanged.connect(
+            lambda: config.browserChoice.set(self.browserChoiceCombo.currentData())
         )
-        self.browserChoiceInput.setText(
-            "Firefox" if config.browserChoice.get() == "firefox" else "Chromium"
-        )
-        self.browserChoiceInput.setDisabled(True)
+
         self.browserChoiceLayout = QVBoxLayout()
         self.browserChoiceLayout.setSpacing(10)
         self.browserChoiceLayout.addWidget(self.browserChoiceLabel)
-        self.browserChoiceLayout.addWidget(self.browserChoiceInput)
+        self.browserChoiceLayout.addWidget(self.browserChoiceCombo)
 
-        self.headlessLabel = BodyLabel("<b>HEADLESS MODE</b>")
-        self.headlessInput = LineEdit()
-        self.headlessInput.setReadOnly(True)
-        self.headlessInput.setMaximumWidth(500)
-        self.headlessInput.setPlaceholderText(
-            "Headless mode is enabled by default."
+        self.headlessLabel = BodyLabel("<b>HEADLESS</b>")
+        self.headlessCheckBox = CheckBox()
+        self.headlessCheckBox.setChecked(config.headless.get())
+        self.headlessCheckBox.toggled.connect(
+            lambda checked: config.headless.set(checked)
         )
-        self.headlessInput.setText(
-            "Enabled" if config.headless.get() else "Disabled"
-        )
-        self.headlessInput.setDisabled(True)
-        self.headlessInputLayout = QVBoxLayout()
-        self.headlessInputLayout.setSpacing(10)
-        self.headlessInputLayout.addWidget(self.headlessLabel)
-        self.headlessInputLayout.addWidget(self.headlessInput)
+
+        self.headlessLayout = QVBoxLayout()
+        self.headlessLayout.setSpacing(10)
+        self.headlessLayout.addWidget(self.headlessLabel)
+        self.headlessLayout.addWidget(self.headlessCheckBox)
 
         self.configsLayout = FlowLayout()
         self.configsLayout.setVerticalSpacing(20)
         self.configsLayout.setHorizontalSpacing(20)
         self.configsLayout.addItem(self.browserChoiceLayout)
-        self.configsLayout.addItem(self.headlessInputLayout)
+        self.configsLayout.addItem(self.headlessLayout)
 
         self.enrollmentIndexLabel = BodyLabel("<b>ENROLLMENT INDEX</b>")
         self.enrollmentIndexInput = SpinBox()
@@ -129,14 +127,16 @@ class HomePage(QWidget):
         self.tableFileInput.setReadOnly(True)
         self.tableFileInput.setMaximumWidth(500)
         self.tableFileInput.setPlaceholderText("No table file selected.")
+        self.tableFileInput.setText(config.tablePath.get())
+        self.tableFileInput.textChanged.connect(lambda text: config.tablePath.set(text))
         self.tableFileDialog = QFileDialog()
         self.tableFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         self.tableFilePickButton = PrimaryToolButton(FluentIcon.FOLDER)
         self.tableFilePickButton.clicked.connect(
             lambda: self.tableFileInput.setText(
-                self.tableFileDialog.getOpenFileName(
-                    self, "Select a table file!"
-                )[0]
+            self.tableFileDialog.getOpenFileName(
+                self, "Select a table file!"
+            )[0]
             )
         )
         self.tableContentLayout = QHBoxLayout()
@@ -167,7 +167,7 @@ class HomePage(QWidget):
         )
         self.runButton = PrimaryToolButton(FluentIcon.PLAY)
         self.runButton.setFixedWidth(100)
-        self.runButton.clicked.connect(self.runExample)
+        self.runButton.clicked.connect(self.runBrowser)
         self.runLogsClearButton = PrimaryToolButton(FluentIcon.DELETE)
         self.runLogsClearButton.setDisabled(True)
         self.runLogsClearButton.setFixedWidth(100)
@@ -216,16 +216,15 @@ class HomePage(QWidget):
 
         self.setLayout(self.mainLayout)
 
-    def runExample(self):
-        """Runs the example logic for this page."""
+    def runBrowser(self):
         if self.worker is not None and self.worker.isRunning():
             return
 
         schema = {
             "Email": self.loginEmailField.text(),
             "Password": self.loginPasswordField.text(),
-            "Browser choice": self.browserChoiceInput.text(),
-            "Headless mode": self.headlessInput.text(),
+            "Browser choice": self.browserChoiceCombo.currentData(),
+            "Headless mode": self.headlessCheckBox.isChecked(),
             "Enrollment index": self.enrollmentIndexInput.value(),
             "Table file": self.tableFileInput.text(),
         }
@@ -243,12 +242,11 @@ class HomePage(QWidget):
 
         self.runButton.setDisabled(True)
 
-
         self.worker = BrowserThread(
             loginEmail=self.loginEmailField.text(),
             loginPassword=self.loginPasswordField.text(),
-            browserChoice=BrowserChoice(self.browserChoiceInput.text().lower()),
-            headless=self.headlessInput.text() == "Enabled",
+            browserChoice=BrowserChoice(self.browserChoiceCombo.currentData()),
+            headless=self.headlessCheckBox.isChecked(),
             enrollmentIndex=self.enrollmentIndexInput.value(),
             tablePath=self.tableFileInput.text(),
         )
