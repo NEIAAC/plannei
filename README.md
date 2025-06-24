@@ -1,10 +1,6 @@
-# Python, now with 39% more GUI 🐍💻
+# TEMPORARY
 
-Template for pythons apps with a GUI. Features automated builds on release with binaries for Windows, MacOS and Linux users to download. Contains linting, formatting and testing tools.
-
-Although this template is meant to be a base for bigger projects, there are some limitations and annoyances that derive from using python bindings with Qt. To name a few, testing can be cumbersome with PyTest-Qt and the API is not always easy to work with or well documented. Other than that, there is also no tooling for using Qt translations with ease so this template essencially provides a non-localized app, this is not to say that it can't be added when building upon it.
-
-With the exception of the points above, we believe this template to be decently production ready.
+PLACEHOLDER TEXT HERE!
 
 ## Usage 🚀
 

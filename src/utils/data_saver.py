@@ -12,6 +12,8 @@ from qfluentwidgets import (
     ColorValidator,
 )
 
+from services.browser import BrowserChoice
+
 from config.metadata import DATA_PATH
 
 CONFIG_PATH = os.path.join(DATA_PATH, "config.json")
@@ -50,7 +52,25 @@ class Config(QConfig):
         ColorSerializer(),
     )
 
-    input = ConfigItem("Example", "Input", "")
+    loginEmail = ConfigItem("Browser", "LoginEmail", "")
+    loginPassword = ConfigItem("Browser", "LoginPassword", "")
+    headless = ConfigItem("Browser", "Headless", False)
+    browserChoice = ConfigItem(
+        "Browser",
+        "BrowserChoice",
+        BrowserChoice.CHROMIUM.value,
+    )
+    enrollmentIndex = ConfigItem(
+        "Browser",
+        "EnrollmentIndex",
+        1,
+    )
+    tablePath = ConfigItem(
+        "Browser",
+        "TablePath",
+        "",
+    )
+
 
     def reset(self):
         for _, attr in self.__class__.__dict__.items():

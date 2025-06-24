@@ -6,6 +6,9 @@ dependencies = [
     "pyside6==6.8.0.2",
     "pyside6-fluent-widgets==1.6.6",
     "loguru==0.7.2",
+    "openpyxl==3.1.5",
+    "types-openpyxl==3.1.5.20250602",
+    "selenium==4.33.0",
 ]
 
 [project.optional-dependencies]

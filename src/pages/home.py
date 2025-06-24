@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtMultimedia import QSoundEffect
 from qfluentwidgets import (
@@ -6,6 +6,10 @@ from qfluentwidgets import (
     LineEdit,
     PrimaryToolButton,
     FluentIcon,
+    SpinBox,
+    CheckBox,
+    ComboBox,
+    FlowLayout,
     SingleDirectionScrollArea,
     SmoothMode,
     TextBrowser,
@@ -14,13 +18,14 @@ from qfluentwidgets import (
 )
 
 from app import App
-from services.example import ExampleThread
+from services.browser import BrowserThread
 from utils.data_saver import config
 from utils import file_loader
+from services.browser import BrowserChoice
 
 
 class HomePage(QWidget):
-    worker: ExampleThread | None = None
+    worker: BrowserThread | None = None
 
     def __init__(self):
         super().__init__()
@@ -32,35 +37,123 @@ class HomePage(QWidget):
         )
         self.finishSound.setVolume(0.2)
 
-        self.firstInputLabel = BodyLabel("<b>FIRST EXAMPLE INPUT<b>")
-        self.firstInputField = LineEdit()
-        self.firstInputField.setMaximumWidth(500)
-        self.firstInputField.setPlaceholderText(
-            "Text written on this one is saved between app restarts!"
+        self.loginEmailLabel = BodyLabel("<b>LOGIN EMAIL<b>")
+        self.loginEmailField = LineEdit()
+        self.loginEmailField.setMaximumWidth(500)
+        self.loginEmailField.setPlaceholderText(
+            "example@student.uc.pt"
         )
-        self.firstInputField.textChanged.connect(
-            lambda text: config.input.set(text)
+        self.loginEmailField.textChanged.connect(
+            lambda text: config.loginEmail.set(text)
         )
-        self.firstInputField.setText(config.input.get())
-        self.firstInputLayout = QVBoxLayout()
-        self.firstInputLayout.setSpacing(10)
-        self.firstInputLayout.addWidget(self.firstInputLabel)
-        self.firstInputLayout.addWidget(self.firstInputField)
+        self.loginEmailField.setText(config.loginEmail.get())
+        self.loginEmailLayout = QVBoxLayout()
+        self.loginEmailLayout.setSpacing(10)
+        self.loginEmailLayout.addWidget(self.loginEmailLabel)
+        self.loginEmailLayout.addWidget(self.loginEmailField)
 
-        self.secondInputLabel = BodyLabel("<b>SECOND EXAMPLE INPUT<b>")
-        self.secondInputField = LineEdit()
-        self.secondInputField.setMaximumWidth(500)
-        self.secondInputField.setPlaceholderText("This is a placeholder.")
-        self.secondInputLayout = QVBoxLayout()
-        self.secondInputLayout.setSpacing(10)
-        self.secondInputLayout.addWidget(self.secondInputLabel)
-        self.secondInputLayout.addWidget(self.secondInputField)
+        self.loginPasswordLabel = BodyLabel("<b>LOGIN PASSWORD<b>")
+        self.loginPasswordField = LineEdit()
+        self.loginPasswordField.setMaximumWidth(500)
+        self.loginPasswordField.setPlaceholderText("********")
+        self.loginPasswordField.setEchoMode(LineEdit.EchoMode.Password)
+        self.loginPasswordField.textChanged.connect(
+            lambda text: config.loginPassword.set(text)
+        )
+        self.loginPasswordField.setText(config.loginPassword.get())
+        self.loginPasswordLayout = QVBoxLayout()
+        self.loginPasswordLayout.setSpacing(10)
+        self.loginPasswordLayout.addWidget(self.loginPasswordLabel)
+        self.loginPasswordLayout.addWidget(self.loginPasswordField)
 
-        self.inputLayout = QVBoxLayout()
-        self.inputLayout.setSpacing(20)
-        self.inputLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.inputLayout.addLayout(self.firstInputLayout)
-        self.inputLayout.addLayout(self.secondInputLayout)
+        self.loginLayout = QVBoxLayout()
+        self.loginLayout.setSpacing(20)
+        self.loginLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.loginLayout.addLayout(self.loginEmailLayout)
+        self.loginLayout.addLayout(self.loginPasswordLayout)
+
+        self.browserChoiceLabel = BodyLabel("<b>BROWSER CHOICE</b>")
+        self.browserChoiceInput = LineEdit()
+        self.browserChoiceInput.setReadOnly(True)
+        self.browserChoiceInput.setMaximumWidth(500)
+        self.browserChoiceInput.setPlaceholderText(
+            "Browser choice is set to Firefox by default."
+        )
+        self.browserChoiceInput.setText(
+            "Firefox" if config.browserChoice.get() == "firefox" else "Chromium"
+        )
+        self.browserChoiceInput.setDisabled(True)
+        self.browserChoiceLayout = QVBoxLayout()
+        self.browserChoiceLayout.setSpacing(10)
+        self.browserChoiceLayout.addWidget(self.browserChoiceLabel)
+        self.browserChoiceLayout.addWidget(self.browserChoiceInput)
+
+        self.headlessLabel = BodyLabel("<b>HEADLESS MODE</b>")
+        self.headlessInput = LineEdit()
+        self.headlessInput.setReadOnly(True)
+        self.headlessInput.setMaximumWidth(500)
+        self.headlessInput.setPlaceholderText(
+            "Headless mode is enabled by default."
+        )
+        self.headlessInput.setText(
+            "Enabled" if config.headless.get() else "Disabled"
+        )
+        self.headlessInput.setDisabled(True)
+        self.headlessInputLayout = QVBoxLayout()
+        self.headlessInputLayout.setSpacing(10)
+        self.headlessInputLayout.addWidget(self.headlessLabel)
+        self.headlessInputLayout.addWidget(self.headlessInput)
+
+        self.configsLayout = FlowLayout()
+        self.configsLayout.setVerticalSpacing(20)
+        self.configsLayout.setHorizontalSpacing(20)
+        self.configsLayout.addItem(self.browserChoiceLayout)
+        self.configsLayout.addItem(self.headlessInputLayout)
+
+        self.enrollmentIndexLabel = BodyLabel("<b>ENROLLMENT INDEX</b>")
+        self.enrollmentIndexInput = SpinBox()
+        self.enrollmentIndexInput.setFixedWidth(200)
+        self.enrollmentIndexInput.setMinimum(1)
+        self.enrollmentIndexInput.setMaximum(99)
+        self.enrollmentIndexInput.valueChanged.connect(
+            lambda value: config.enrollmentIndex.set(value)
+        )
+        self.enrollmentIndexInput.setValue(config.enrollmentIndex.get())
+        self.enrollmentIndexLayout = QVBoxLayout()
+        self.enrollmentIndexLayout.setSpacing(10)
+        self.enrollmentIndexLayout.addWidget(self.enrollmentIndexLabel)
+        self.enrollmentIndexLayout.addWidget(self.enrollmentIndexInput)
+
+        self.tableLabel = BodyLabel("<b>SCHEDULE TABLE FILE</b>")
+        self.tableFileInput = LineEdit()
+        self.tableFileInput.setReadOnly(True)
+        self.tableFileInput.setMaximumWidth(500)
+        self.tableFileInput.setPlaceholderText("No table file selected.")
+        self.tableFileDialog = QFileDialog()
+        self.tableFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        self.tableFilePickButton = PrimaryToolButton(FluentIcon.FOLDER)
+        self.tableFilePickButton.clicked.connect(
+            lambda: self.tableFileInput.setText(
+                self.tableFileDialog.getOpenFileName(
+                    self, "Select a table file!"
+                )[0]
+            )
+        )
+        self.tableContentLayout = QHBoxLayout()
+        self.tableContentLayout.setSpacing(10)
+        self.tableContentLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.tableContentLayout.addWidget(self.tableFilePickButton)
+        self.tableContentLayout.addWidget(self.tableFileInput)
+        self.tableLayout = QVBoxLayout()
+        self.tableLayout.setSpacing(10)
+        self.tableLayout.addWidget(self.tableLabel)
+        self.tableLayout.addLayout(self.tableContentLayout)
+
+        self.inputsLayout = QVBoxLayout()
+        self.inputsLayout.setSpacing(20)
+        self.inputsLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.inputsLayout.addLayout(self.enrollmentIndexLayout)
+        self.inputsLayout.addLayout(self.tableLayout)
 
         self.runLogsBox = TextBrowser()
         self.runLogsBox.setHtml("")
@@ -99,7 +192,9 @@ class HomePage(QWidget):
         self.contentLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.contentLayout.setContentsMargins(40, 40, 50, 40)
         self.contentLayout.setSpacing(40)
-        self.contentLayout.addLayout(self.inputLayout)
+        self.contentLayout.addLayout(self.loginLayout)
+        self.contentLayout.addLayout(self.configsLayout)
+        self.contentLayout.addLayout(self.inputsLayout)
         self.contentLayout.addLayout(self.runContentLayout)
         self.contentWidget = QWidget()
         self.contentWidget.setLayout(self.contentLayout)
@@ -127,7 +222,12 @@ class HomePage(QWidget):
             return
 
         schema = {
-            "First input": self.firstInputField.text(),
+            "Email": self.loginEmailField.text(),
+            "Password": self.loginPasswordField.text(),
+            "Browser choice": self.browserChoiceInput.text(),
+            "Headless mode": self.headlessInput.text(),
+            "Enrollment index": self.enrollmentIndexInput.value(),
+            "Table file": self.tableFileInput.text(),
         }
         for input in schema:
             if not schema[input]:
@@ -143,9 +243,14 @@ class HomePage(QWidget):
 
         self.runButton.setDisabled(True)
 
-        self.worker = ExampleThread(
-            self.firstInputField.text(),
-            self.secondInputField.text(),
+
+        self.worker = BrowserThread(
+            loginEmail=self.loginEmailField.text(),
+            loginPassword=self.loginPasswordField.text(),
+            browserChoice=BrowserChoice(self.browserChoiceInput.text().lower()),
+            headless=self.headlessInput.text() == "Enabled",
+            enrollmentIndex=self.enrollmentIndexInput.value(),
+            tablePath=self.tableFileInput.text(),
         )
 
         def output(text, level):
