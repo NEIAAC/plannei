@@ -224,7 +224,6 @@ class HomePage(QWidget):
             "Email": self.loginEmailField.text(),
             "Password": self.loginPasswordField.text(),
             "Browser choice": self.browserChoiceCombo.currentData(),
-            "Headless mode": self.headlessCheckBox.isChecked(),
             "Enrollment index": self.enrollmentIndexInput.value(),
             "Table file": self.tableFileInput.text(),
         }
