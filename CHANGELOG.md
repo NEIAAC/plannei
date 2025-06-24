@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/NEIAAC/plannei/compare/v1.1.0...v1.1.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* Manually bundle selenium files ([9c30398](https://github.com/NEIAAC/plannei/commit/9c303983d1a91fe706e0ec0b6c14bac2220814ed))
+
 ## [1.1.0](https://github.com/NEIAAC/plannei/compare/v1.0.0...v1.1.0) (2025-06-24)
 
 
