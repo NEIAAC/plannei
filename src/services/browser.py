@@ -10,6 +10,7 @@ from openpyxl import load_workbook, __version__ as openpyxl_version
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.common.exceptions import NoSuchElementException
 
 from utils.logger import logger, LogLevel
 
@@ -128,7 +129,6 @@ class BrowserThread(QThread):
         else:
             options.add_argument("--start-maximized")
         options.add_experimental_option("excludeSwitches", ["enable-logging"])
-        options.page_load_strategy = "eager"
         service = webdriver.ChromeService(log_output=subprocess.DEVNULL)
         driver = webdriver.Chrome(options=options, service=service)
         if not self.headless:
@@ -151,7 +151,6 @@ class BrowserThread(QThread):
             options.add_argument("--width=1920")
             options.add_argument("--height=1080")
             options.add_argument("--headless")
-        options.page_load_strategy = "eager"
         service = webdriver.FirefoxService(log_output=subprocess.DEVNULL)
         driver = webdriver.Firefox(options=options, service=service)
         if not self.headless:
@@ -190,9 +189,10 @@ class BrowserThread(QThread):
                     LogLevel.ERROR,
                 )
                 return
-            if len(headers) != 4:
+            expectedColumns = 5
+            if len(headers) != expectedColumns:
                 self.output(
-                    "Given table must have exactly 4 columns",
+                    f"Given table must have exactly {expectedColumns} columns",
                     LogLevel.ERROR,
                 )
                 return
@@ -204,37 +204,44 @@ class BrowserThread(QThread):
                     | Literal["className"]
                     | Literal["PL"]
                     | Literal["TP"]
-                    | Literal["T"],
+                    | Literal["T"]
+                    | Literal["T/TP"],
                     str | list[str] | None,
                 ],
             ] = {}
             for item in rows_dict:
                 classId = item[headers[0]].replace(" ", "").split("#")[0]
 
-                pl_array = (
+                Pls = (
                     item[headers[1]].replace(" ", "").split("#")
                     if item[headers[1]]
                     else None
                 )
-                tp_array = (
+                Tps = (
                     item[headers[2]].replace(" ", "").split("#")
                     if item[headers[2]]
                     else None
                 )
-                t_array = (
+                Ts = (
                     item[headers[3]].replace(" ", "").split("#")
                     if item[headers[3]]
+                    else None
+                )
+                Ttps = (
+                    item[headers[4]].replace(" ", "").split("#")
+                    if item[headers[4]]
                     else None
                 )
 
                 classes_dict[classId] = {
                     "href": None,
-                    "PL": pl_array,
-                    "TP": tp_array,
-                    "T": t_array,
+                    "PL": Pls,
+                    "TP": Tps,
+                    "T": Ts,
+                    "T/TP": Ttps,
                 }
             self.output(
-                f"{'[DRY-RUN MODE] ' if self.dryRun else ''}Enrolling in the {len(classes_dict)} classes found in the schedule table",
+                f"{'[DRY-RUN] ' if self.dryRun else ''}Enrolling in the {len(classes_dict)} classes found in the schedule table",
             )
 
             self.output("Starting browser")
@@ -366,7 +373,7 @@ class BrowserThread(QThread):
                     # Use back button instead of trying to find save in dry run mode
                     save_button = driver.find_element(By.ID, "botaoVoltar")
 
-                classTypes = ("PL", "TP", "T")
+                classTypes = ("PL", "TP", "T", "T/TP")
 
                 for classType in classTypes:
                     if classData[classType]:
@@ -384,7 +391,7 @@ class BrowserThread(QThread):
                             f"Choosing {classType} schedule for class {classData['className']}"
                         )
                         possibilities_dict: dict[str, WebElement] = {}
-                        alreadyPicked = False
+                        alreadyPickedNumber: str | None = None
                         for row in classRows:
                             cells = row.find_elements(By.TAG_NAME, "td")
 
@@ -416,20 +423,17 @@ class BrowserThread(QThread):
                                 classCheckbox = cells[-1].find_element(
                                     By.TAG_NAME, "input"
                                 )
-                            if classCheckbox.get_attribute("disabled"):
-                                continue
                             if classCheckbox.get_attribute("checked"):
-                                alreadyPicked = True
+                                alreadyPickedNumber = classNumberPreference
+                                possibilities_dict[classNumberPreference] = (
+                                    classCheckbox
+                                )
+                                continue
+                            if classCheckbox.get_attribute("disabled"):
                                 continue
                             possibilities_dict[classNumberPreference] = (
                                 classCheckbox
                             )
-                        if alreadyPicked:
-                            self.output(
-                                f"Already picked {classType} schedule",
-                                LogLevel.INFO,
-                            )
-                            continue
                         if not possibilities_dict:
                             self.output(
                                 "None of the preferences were available, may need manual picking",
@@ -441,6 +445,15 @@ class BrowserThread(QThread):
                                 classNumberPreference
                                 in possibilities_dict.keys()
                             ):
+                                if alreadyPickedNumber == classNumberPreference:
+                                    picked_dict[
+                                        f"{classData['className']} {classType}"
+                                    ] = alreadyPickedNumber
+                                    self.output(
+                                        f"Best preference, {classType}{alreadyPickedNumber}, is already picked",
+                                        LogLevel.INFO,
+                                    )
+                                    break
                                 self.output(
                                     f"Enrolling in {classType}{classNumberPreference}"
                                 )
@@ -463,8 +476,26 @@ class BrowserThread(QThread):
                 for className, preference in picked_dict.items():
                     self.output(f"{className}{preference}", LogLevel.SUCCESS)
 
+        except NoSuchElementException as error:
+            self.output(
+                "An element was not found in time on the page, this can mean two things:",
+                LogLevel.ERROR,
+            )
+            self.output(
+                "1. Your browser is either outdated or was too slow on this run, trying again, using a different browser or updating your current browser should fix this",
+                LogLevel.ERROR,
+            )
+            self.output(
+                "2. The website was updated, which means we also need to update the app to fix it, please report this issue to us",
+                LogLevel.ERROR,
+            )
+            if error.msg:
+                self.output(
+                    " ".join(error.msg.split(": ")[2:]).split(";")[0],
+                    LogLevel.ERROR,
+                )
         except Exception as error:
             self.output(
-                f"An unexpected error occurred: {f'{error}'.split(';')[0][9:]}",
+                f"An unexpected error occurred: {error}",
                 LogLevel.ERROR,
             )

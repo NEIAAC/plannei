@@ -8,6 +8,8 @@ You can now be the biggest nerd on the block and get the schedule you want as so
 
 _NEI/AAC is not responsible for you losing your perfect schedule due to issues with the app. Because of the way the app interacts with the nonio portal, minimal updates/changes to the website layout by the creators may break functionality. We kindly ask you to report any issues you encounter as soon as possible, so we can update our implementation._
 
+![preview.gif](./preview.gif)
+
 ## Usage 🚀
 
 - The app is automatically built by a pipeline with every release, so we provide **direct download links** for most operating systems.
