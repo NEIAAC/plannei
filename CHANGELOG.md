@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/NEIAAC/plannei/compare/v1.1.2...v1.1.3) (2025-06-25)
+
+
+### Bug Fixes
+
+* Improve error messages ([43bc124](https://github.com/NEIAAC/plannei/commit/43bc124e15e0a8ec5918c8741c9013d924e581d3))
+
 ## [1.1.2](https://github.com/NEIAAC/plannei/compare/v1.1.1...v1.1.2) (2025-06-25)
 
 
