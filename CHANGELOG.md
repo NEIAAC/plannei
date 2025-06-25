@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/NEIAAC/plannei/compare/v1.1.1...v1.1.2) (2025-06-25)
+
+
+### Documentation
+
+* Add dev mode tip to usage ([e9c8bd5](https://github.com/NEIAAC/plannei/commit/e9c8bd5ed404c8c28e4c9f2e6acac90a97bf04e1))
+* Update error instructions ([f86d610](https://github.com/NEIAAC/plannei/commit/f86d610499f2607cb6943e6efc997c5f6376b377))
+
 ## [1.1.1](https://github.com/NEIAAC/plannei/compare/v1.1.0...v1.1.1) (2025-06-24)
 
 
