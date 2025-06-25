@@ -12,6 +12,8 @@ _NEI/AAC is not responsible for you losing your perfect schedule due to issues w
 
 - The app is automatically built by a pipeline with every release, so we provide **direct download links** for most operating systems.
 
+- If you run into issues with the downloads below, or if the app does not launch, you can always run it as a developer using [these](https://github.com/NEIAAC/plannei?tab=readme-ov-file#development-%EF%B8%8F) instructions. It's especially easy if you already have Python installed!
+
 - ### Windows 🪟
 
   - [Use this link to start the download.](https://github.com/NEIAAC/plannei/releases/latest/download/Windows.zip)
