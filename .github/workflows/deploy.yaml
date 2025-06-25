@@ -75,8 +75,7 @@ jobs:
           file-description: ${{ needs.prepare.outputs.name }} app, created by ${{ needs.prepare.outputs.author }}.
           output-dir: build
           enable-plugins: pyside6
-          include-package: selenium
-
+          
       - name: Rename build
         working-directory: build
         run: mv main.app ${{ needs.prepare.outputs.name }}.app
@@ -121,7 +120,6 @@ jobs:
           enable-plugins: pyside6
           clang: true
           static-libpython: yes
-          include-package: selenium
 
       - name: Rename build
         working-directory: build
@@ -166,7 +164,6 @@ jobs:
           file-description: ${{ needs.prepare.outputs.name }} app, created by ${{ needs.prepare.outputs.author }}.
           output-dir: build
           enable-plugins: pyside6
-          include-package: selenium
 
       - name: Rename build
         working-directory: build
