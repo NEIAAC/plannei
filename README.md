@@ -4,7 +4,7 @@ Using Plannei, our _state of the art_ schedule automater, you can ensure you get
 
 The app runs a self-managed browser that will seamlessly interact with our student portal, [nonio](https://xws.pt/nonio), to automatically fill in the data to get your perfect schedule, based on the preferences you give it throught a spreadsheet.
 
-You can now be the biggest nerd on the block and get the schedule you want as soon as the enrollment period opens, leaving your colleagues in the dust
+You can now be the biggest nerd on the block and get the schedule you want as soon as the enrollment period opens, leaving your colleagues in the dust.
 
 _NEI/AAC is not responsible for you losing your perfect schedule due to issues with the app. Because of the way the app interacts with the nonio portal, minimal updates/changes to the website layout by the creators may break functionality. We kindly ask you to report any issues you encounter as soon as possible, so we can update our implementation._
 
