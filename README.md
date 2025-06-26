@@ -73,6 +73,9 @@ _NEI/AAC is not responsible for you losing your perfect schedule due to issues w
     python src/main.py
     ```
 
+  - The app will create and store logs in a diretory determined by `QStandardPaths.StandardLocation.GenericConfigLocation/AUTHOR_NAME/EXECUTABLE_NAME` which is OS independent.
+  These logs can be requested from users to get data on why things are not working. Running the binary with the `--debug` flag will increase the verbosity of the logs, for more detailed information.
+
 - ### Tooling 🧰
 
   - Mypy is used for type checking:
