@@ -20,6 +20,8 @@ _NEI/AAC is not responsible for you losing your perfect schedule due to issues w
 
 - See the [example](./example/) directory for demo files.
 
+- Make sure you close every other program that may be using your CPU to get the maximum speed when running the app!
+
 - ### Windows 🪟
 
   - [Use this link to start the download.](https://github.com/NEIAAC/plannei/releases/latest/download/Windows.zip)
