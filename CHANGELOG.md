@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/NEIAAC/plannei/compare/v1.2.0...v1.3.0) (2025-06-26)
+
+
+### Features
+
+* Add debug flag ([2338399](https://github.com/NEIAAC/plannei/commit/2338399c9e8171cac95b4f8a8998869e18444c7d))
+
 ## [1.2.0](https://github.com/NEIAAC/plannei/compare/v1.1.5...v1.2.0) (2025-06-26)
 
 
