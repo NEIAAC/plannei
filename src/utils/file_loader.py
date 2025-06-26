@@ -7,7 +7,8 @@ from utils.logger import logger
 def getFilePath(fileName: str) -> str:
     locations = (
         # Files bundled inside the single binary build
-        os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)),
+        os.path.join(os.path.dirname(__file__), os.pardir),
+        os.path.dirname(__file__),
         # Files in the directory the single binary build is in
         os.path.dirname(sys.argv[0]),
     )
@@ -18,7 +19,7 @@ def getFilePath(fileName: str) -> str:
         pass
 
     for location in locations:
-        filePath = os.path.join(location, fileName)
+        filePath = os.path.abspath(os.path.join(location, fileName))
         if os.path.isfile(filePath):
             logger.debug(f"Returning file path: {filePath}")
             return filePath
