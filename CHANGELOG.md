@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/NEIAAC/plannei/compare/v1.1.5...v1.2.0) (2025-06-26)
+
+
+### Features
+
+* Add splash screen ([2699fcd](https://github.com/NEIAAC/plannei/commit/2699fcd6f3cc2669f0fc6828fade27415385bf0c))
+
 ## [1.1.5](https://github.com/NEIAAC/plannei/compare/v1.1.4...v1.1.5) (2025-06-26)
 
 
