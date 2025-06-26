@@ -10,9 +10,13 @@ def loadFile(fileName: str) -> str:
         os.path.dirname(__file__),
         # Files in the directory the single binary build is in
         os.path.dirname(sys.argv[0]),
-        # Files in the standalone build directory
-        __compiled__.containing_dir,  # type: ignore # noqa: F821
     )
+    try:
+        # Files in the standalone build directory
+        locations = locations + (__compiled__.containing_dir,)  # type: ignore
+    except NameError:
+        pass
+
     for location in locations:
         file = os.path.join(location, fileName)
         if os.path.isfile(file):

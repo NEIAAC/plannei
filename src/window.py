@@ -1,6 +1,8 @@
 import os
 import sys
 
+from app import App
+
 old = sys.stdout
 try:
     sys.stdout = open(os.devnull, "w")
@@ -24,6 +26,8 @@ from pages.settings import SettingsPage
 class Window(FluentWindow):
     def __init__(self):
         super().__init__()
+
+        App.alert(self, 0)
 
         self.setMicaEffectEnabled(False)
         self.resize(QSize(config.width.get(), config.height.get()))
