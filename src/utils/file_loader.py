@@ -1,13 +1,26 @@
 import os
 import sys
 
+from utils.logger import logger
+
 
 def loadFile(fileName: str) -> str:
-    try:
-        file = os.path.join(__compiled__.containing_dir, fileName)  # type: ignore
-    except NameError:
-        file = os.path.join(os.path.dirname(sys.argv[0]), fileName)
-    return file
+    locations = (
+        # Files bundled inside the single binary build
+        os.path.dirname(__file__),
+        # Files in the directory the single binary build is in
+        os.path.dirname(sys.argv[0]),
+        # Files in the standalone build directory
+        __compiled__.containing_dir,  # type: ignore # noqa: F821
+    )
+    for location in locations:
+        file = os.path.join(location, fileName)
+        if os.path.isfile(file):
+            return file
+    logger.error(
+        f"Got a request to load file {fileName} but it could not be found, returning empty string"
+    )
+    return ""
 
 
 def loadResource(resourceName: str) -> str:
