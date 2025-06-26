@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.4](https://github.com/NEIAAC/plannei/compare/v1.1.3...v1.1.4) (2025-06-26)
+
+
+### Bug Fixes
+
+* Make app icon display correctly on taskbar ([1b6e76e](https://github.com/NEIAAC/plannei/commit/1b6e76e0b2a7c1da8179e5760517088d4c4fb0c1))
+* Update broken file loading logic ([85b8ecb](https://github.com/NEIAAC/plannei/commit/85b8ecb72ad697bd4ac131d096a1a95b22a51796))
+
 ## [1.1.3](https://github.com/NEIAAC/plannei/compare/v1.1.2...v1.1.3) (2025-06-25)
 
 
