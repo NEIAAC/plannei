@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/NEIAAC/plannei/compare/v1.1.4...v1.1.5) (2025-06-26)
+
+
+### Bug Fixes
+
+* Improve cross platform path resolution ([4ff3d4a](https://github.com/NEIAAC/plannei/commit/4ff3d4a77c96d103d908fb31eae6f6efba2ebee4))
+
 ## [1.1.4](https://github.com/NEIAAC/plannei/compare/v1.1.3...v1.1.4) (2025-06-26)
 
 
