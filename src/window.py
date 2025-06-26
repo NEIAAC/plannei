@@ -54,7 +54,7 @@ class Window(FluentWindow):
         self.splashScreen.finish()
 
     def closeEvent(self, e):
-        """Saves the current window geometry before closing."""
+        """Saves the current window geometry and other settings before closing."""
         config.width.set(self.width())
         config.height.set(self.height())
         config.x.set(self.x())

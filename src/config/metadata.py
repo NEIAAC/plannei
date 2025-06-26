@@ -7,7 +7,7 @@ EXECUTABLE_NAME = "Plannei"
 AUTHOR_NAME = "NEIAAC"
 AUTHOR_DOMAIN = "neiaac.com"
 
-LOGO_PATH = os.path.join("icons", "logo.png")
+LOGO_PATH = os.path.join("images", "logo.png")
 
 DATA_PATH = os.path.join(
     QStandardPaths.writableLocation(

@@ -158,6 +158,9 @@ jobs:
           mode: app
           include-data-dir: src/resources=resources
           windows-icon-from-ico: src/resources/icons/logo.png
+          onefile-windows-splash-screen-image: src/resources/icons/splash.png
+          force-stdout-spec: "{PROGRAM_BASE}.out"
+          force-stderr-spec: "{PROGRAM_BASE}.err"
           windows-console-mode: disable
           product-version: ${{ needs.prepare.outputs.version }}
           file-version: ${{ needs.prepare.outputs.version }}
