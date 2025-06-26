@@ -158,7 +158,7 @@ jobs:
           mode: app
           include-data-dir: src/resources=resources
           windows-icon-from-ico: src/resources/images/logo.png
-          onefile-windows-splash-screen-image: src/resources/icons/splash.png
+          onefile-windows-splash-screen-image: src/resources/images/splash.png
           force-stdout-spec: "{PROGRAM_BASE}.out"
           force-stderr-spec: "{PROGRAM_BASE}.err"
           windows-console-mode: disable
