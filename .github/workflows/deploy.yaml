@@ -75,7 +75,8 @@ jobs:
           file-description: ${{ needs.prepare.outputs.name }} app, created by ${{ needs.prepare.outputs.author }}.
           output-dir: build
           enable-plugins: pyside6
-          
+          include-qt-plugins: sensible,multimedia
+
       - name: Rename build
         working-directory: build
         run: mv main.app ${{ needs.prepare.outputs.name }}.app
@@ -117,9 +118,10 @@ jobs:
           product-name: ${{ needs.prepare.outputs.name }}
           file-description: ${{ needs.prepare.outputs.name }} app, created by ${{ needs.prepare.outputs.author }}.
           output-dir: build
-          enable-plugins: pyside6
           clang: true
           static-libpython: yes
+          enable-plugins: pyside6
+          include-qt-plugins: sensible,multimedia
 
       - name: Rename build
         working-directory: build
@@ -164,6 +166,7 @@ jobs:
           file-description: ${{ needs.prepare.outputs.name }} app, created by ${{ needs.prepare.outputs.author }}.
           output-dir: build
           enable-plugins: pyside6
+          include-qt-plugins: sensible,multimedia
 
       - name: Rename build
         working-directory: build
