@@ -18,6 +18,12 @@ def loadFile(fileName: str) -> str:
         pass
 
     for location in locations:
+        logger.debug(f"Logging files in location: {location}")
+        for root, _, files in os.walk(location):
+            for file in files:
+                full_path = os.path.join(root, file)
+                logger.debug(f"Found file: {full_path}")
+
         file = os.path.join(location, fileName)
         if os.path.isfile(file):
             return file
